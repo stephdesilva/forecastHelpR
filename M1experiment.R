@@ -66,7 +66,8 @@ tsArray <- buildTSArray(M1, nObjects,  minDate, maxDate, freqList, skipList)
 # assess frequency membership
 ## TO DO create a function that will give a list of objects in each frequency type
 
-
+metaY <-data.frame(NA, nrow = nObjects, ncol = 3)
+colnames(metaY) <- c("index", "frequency", "group")
 freqMembership <- list()
 
 for (k in 1: nrow(freqList)){
@@ -74,8 +75,10 @@ for (k in 1: nrow(freqList)){
   y <- t(tsArray[,k,])
   groupMembership <- {}
   for (i in 1:nObjects){
+    metaY[i,1] <- i
     if(sum(!is.na(y[,i]))!=0){
       groupMembership <- c(groupMembership, i)
+      metaY[i,2] <- k
     }
   }
   freqMembership[[length(freqMembership) + 1]] <- list(groupMembership)
@@ -107,8 +110,15 @@ for (i in 1:nrow(freqList)){
     y <- metaDataFeatures[1:lenObjects,,i]
 
 
-    groups[[i]] <- assessClusters(y, maxCluster)
+    sortGroup <- assessClusters(y, maxCluster)
+    metaY[which(metaY$frequency == i),3] <- sortGroup
+
 }
+
+
+
+
+
 
   ## if > 1 series in any cluster, check correlation matrix between them.
   # on detrended/deseasonalised data!
@@ -116,57 +126,32 @@ for (i in 1:nrow(freqList)){
   # only check correlations between the core series.
 
 fit <- array(NA, c(ncol(y), numFitSources, numGen))
-bestFit <- matrix(10000, nrow = ncol(y), ncol=1) # ridiculously high fitness to come down from
+bestFit <- matrix(nObjects, nrow = ncol(y), ncol=1) # ridiculously high fitness to come down from
 
 
  for (k in 1:nrow(freqList)){
    print ("K:")
    print(k)
-   for (i in 1:max(unlist(groups))){
+   for (i in 1:maxCluster){
      print("i:")
      print(i)
-     y <- t(tsArray[,k,]) # to do: why is this full of NA when i = 1, k = 2?
-     index <- which(groups[[k]] == i)
-
-
-
-#
-#     if (length(index) >= 2){
-#       output <- assessPanels(index, y, corThreshold) ## TODO fix this
-#       groupPanel <- output$GP
-#       excessPanel <- output$EP
-#     }
-#     dataGroup <- y[,index]
-#   } ## end group loops
-# }   ## end frequency loops
+     y <- t(tsArray[,k,])
+     index <- which((metaY$frequency == k) & metaY$group == i)
 
     ## next decide how to model each series.
     # Plan sample randomly a number from each cluster, estimate
     # in all the ways contended, compare the MAPSE for each and decided on the best
     # in each group
 
-    choiceModel <- assessInitialModel(numberGroupTests,  y[, index])
+    choiceModel <- assessInitialModel(y[, index])
 
-    # can we use panel techniques?
-    # plm package
+    output <- estimateModel(index, choiceModel, y, fit,
+                            bestFit, currentGen,lastSlot, metaDataFeatures)
 
+    metaDataFeatures <- output$MD
+    bestFit <- output$BF
+    fit <- output$Fi
 
-    # Maybe depends on the technique
-    # don't worry about this right now
-
-
-    # ????
-
-    ### Estimate - need to work out the nested data frame
-    ## TO DO FIX THIS
-
-    # output <- estimateModel(index, choiceModel, y, fit,
-    #                         bestFit, currentGen,lastSlot, metaDataFeatures)
-    #
-    # metaDataFeatures <- output$MD
-    # bestFit <- output$BF
-    # fit <- output$Fi
-    #
 
     ## Calculate forecasting criteria -> if we have a new best estimate, keep in best estimates
     # otherwise abandon
