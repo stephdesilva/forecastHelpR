@@ -63,12 +63,6 @@ maxDate <- endDates[[2]]
 
 tsArray <- buildTSArray(M1, nObjects,  minDate, maxDate, freqList, skipList)
 
-item <- 0
-for (i in 1:1001){
-  item <- item + (sum((tsArray[i,k,])))
-}
-print(item)
-
 # assess frequency membership
 ## TO DO create a function that will give a list of objects in each frequency type
 

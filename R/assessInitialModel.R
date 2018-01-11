@@ -8,27 +8,26 @@
 #' Current choices: automated arima or nnetar
 #' Possible future choices: arch + garch
 #'
-#' @param numberGroupTests how many times are we going to test in each group?
-#' So far, it only keeps one choice!
-#' @param dataGroup the data for the group we're testing
+#'  @param dataGroup the data for the group we're testing
 #'
 #' @return choiceModel, the character choice of the model we've found best options for.
 #' @export
 #'
 #' @examples
 #'
-#' modelChoice <- assessInitialModel(numberTests, data)
+#' modelChoice <- assessInitialModel(data)
 #'
-assessInitialModel <- function(numberGroupTests, dataGroup){
+assessInitialModel <- function(dataGroup){
 
-  for (k in 1: numberGroupTests){
-    if (is.null(ncol(dataGroup))){
+     if (is.null(ncol(dataGroup))){
       pick <- 1
       pick <- dataGroup
     } else {
       pick <- as.integer(runif(1, 1, ncol(dataGroup) + 1))
       pick <- dataGroup[,pick]
     }
+
+    pick <- pick[complete.cases(pick)]
 
     fitARIMA.pick <- accuracy(auto.arima(pick)) # this should be a functional of some kind
     fitANN.pick <- accuracy(nnetar(pick))
@@ -38,8 +37,6 @@ assessInitialModel <- function(numberGroupTests, dataGroup){
     } else {
       choiceModel <- "ann"
     }
-
-  }
 
   return(choiceModel)
 }

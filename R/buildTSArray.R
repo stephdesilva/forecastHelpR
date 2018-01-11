@@ -109,6 +109,6 @@ buildTSArray <- function(y,nObjects, minDate, maxDate, freqList, skipList){
   }
 
 
-  returnData <- data
-  return(returnData)
+
+  return(data)
 }
