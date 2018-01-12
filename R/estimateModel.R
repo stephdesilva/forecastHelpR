@@ -1,23 +1,16 @@
-estimateModel <- function(index, choiceModel, y, fit,
+estimateModel <- function(metaY, index, choiceModel, y, fit,
                           bestFit, currentGen,lastSlot, metaDataFeatures){
   for (j in 1:length(index)){
+    if (is.na(choiceModel) | is.null(choiceModel)){
+      choiceModel <- "arima" # default to arima
+    }
 
     estY <-na.omit(y[,index[[j]]])
-    if (choiceModel == "arima"){
-      accFit <- accuracy(auto.arima(estY))
-    } else if (choiceModel == "ann") {
-      accFit <- accuracy(nnetar(estY))
-    } else {
-      print ("Arrgggh don't have that model")
-      break
-    }
 
-    if (accFit[4] < bestFit[index[j]]){
-      fit[index[j], ,currentGen] <- accFit
-      bestFit[index[j]] <- accFit[,4]
-      metaDataFeatures[index[j], lastSlot, currentGen] <- choiceModel
-    }
+    accFit <- estModel(choiceModel, estY)
+
+    returnList <- decisionRule(accFit, bestFit, fit, metaY, index[j], choiceModel, currentGen)
   }
 
-  return(list("MD" = metaDataFeatures, "BF" = bestFit, "Fi" = fit))
+  return(returnList)
 }

@@ -1,6 +1,7 @@
 initialiseModels <- function(freqList, tsArray, nObjects, features,numFitSources, numGen){
-  metaY <-data.frame(NA, nrow = nObjects, ncol = 3)
-  colnames(metaY) <- c("index", "frequency", "group")
+  metaY <-matrix(NA, nrow = nObjects, ncol = 4)
+  metaY <- as.data.frame(metaY)
+  colnames(metaY) <- c("index", "frequency", "group", "bestModel")
   freqMembership <- list()
 
   for (k in 1: nrow(freqList)){
@@ -64,12 +65,15 @@ initialiseModels <- function(freqList, tsArray, nObjects, features,numFitSources
 
       choiceModel <- assessInitialModel(y[, index])
 
-      output <- estimateModel(index, choiceModel, y, fit,
+
+      output <- estimateModel(metaY, index, choiceModel, y, fit,
                               bestFit, currentGen,lastSlot, metaDataFeatures)
 
-      metaDataFeatures <- output$MD
+
       bestFit <- output$BF
       fit <- output$Fi
+      metaY <- output$MY
+      metaY[index, 4] <- choiceModel
 
 
       ## Calculate forecasting criteria -> if we have a new best estimate, keep in best estimates
@@ -79,6 +83,6 @@ initialiseModels <- function(freqList, tsArray, nObjects, features,numFitSources
     }  # end group loops
   }    # end frequency loops
 
-  returnList <- list("MDF" = metaDataFeatures, "BF" = bestFit, "FI" = fit)
+  returnList <- list("MDF" = metaDataFeatures, "BF" = bestFit, "Fi" = fit, "MY" = metaY)
   return(returnList)
 }

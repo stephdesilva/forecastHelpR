@@ -1,6 +1,6 @@
 #M1 experiment
 rm(list=ls(all=TRUE)) # clear the workspace of anything else
-
+set.seed(1234)
 # a script to examine the process from the beginning
 library(forecastHelpR)
 library(tidyverse)
@@ -14,7 +14,7 @@ skipList <- c(51, 217, 218, 493, 494, 223, 442, 548, 549, 550, 551,
               552, 553, 554, 555, 556, 557, 558, 559)
 nObjects <- 1001
 proposedMaxLength <- 10000
-numGen <- 5
+numGen <- 10
 maxCluster <- 2
 stopNow <- 100
 corThreshold <- 0.2
@@ -22,6 +22,8 @@ numberGroupTests <- 1
 currentGen <- 1
 numFitSources<- 7
 weakLinkPercent <- 0.1
+permuteParam <- 0.7
+
 #freqList <- c("annual", "quarterly", "monthly")
 freqList <- tibble(
             freq = c(1, 4, 12),
@@ -41,6 +43,7 @@ meta <- c("clusterNumber", "rank", "gensSinceImprovement",
           "modelChoice")
 
 features <- c(IC, measures, features, meta)
+modelList <- c("arima", "ann")
 
 lastSlot <- length(features)
 
@@ -69,4 +72,37 @@ tsArray <- buildTSArray(M1, nObjects,  minDate, maxDate, freqList, skipList)
 initialObjects <- initialiseModels(freqList, tsArray, nObjects,
                                    features,numFitSources, numGen)
 
+metaY <- initialObjects$MY
+fit <- initialObjects$Fi
+bestFit <- initialObjects$BF
+
+for (p in 1:numGen){
+
+  for (i in 1:nObjects){
+      freqPosition <- metaY[i,2]
+      z <- na.omit(tsArray[i,freqPosition,])
+      if (length(unique(z)) < 1){
+        z <- getYData(M1[[i]]) ##### NOTE THAT THERE IS A REFERENCE TO M1 HERE
+        z <- z$d
+        metaY[i,4] <- "arima" ## Just going to default to arima here.
+      }
+      overallFit <- permuteModel(z, metaY[i,4],
+                                 permuteParam, modelList, bestFit, fit, i,
+                                 p)
+      bestFit <- overallFit$BF
+      fit <- overallFit$Fi
+      metaY <- overallFit$MY
+  }
+
+
+}
+
+chartData <- fit[5,4,]
+gens <- as.vector(seq(1,numGen, 1))
+chartData <- as.data.frame(cbind(chartData, gens))
+
+
+ggplot(chartData)+
+  geom_line(aes(x = gens, y = chartData))+
+  theme_light()
 
