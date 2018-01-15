@@ -1,8 +1,56 @@
-initialiseModels <- function(freqList, tsArray, nObjects, features,numFitSources, numGen){
-  metaY <-matrix(NA, nrow = nObjects, ncol = 4)
+#' Initialise Models
+#'
+#' Initialise models using start points clustered on metadata.
+#' 1. Work out which group each time series belongs to. They are grouped by frequency type.
+#' 2. Estimate metafeatures for each time series in each group
+#' 3. Cluster time series up to maximum number of clusters
+#' 4. In each cluster, assess an initial model and estimate for all
+#' 5. Return information o fit and model.
+#'
+#' @param freqList a tibble with frequency information
+#' @param tsArray the time series array with all the data, organised by frequency types
+#' @param nObjects number of objects in total to be estimated
+#' @param features features to be estimated
+#' @param numFitSources number of sources for measures of fit
+#' @param numGen the total number of generations to be used in the experiment
+#' @param modelList list of models to be considered
+#' @param h forecast horizon
+#' @param maxCluster maximum number of clusters allowed
+#'
+#' @return "MDF" = metaDataFeatures - estimates of features on each time series,
+#' "BF" = bestFit so far obtained for each time series.
+#' "Fi" = fit, current fit for each time series as well as previous efforts
+#' "MY" = metaY metadata on each series, including best model choice so far.
+#' @export
+#'
+#' @examples
+#'
+#' initialObjects <- initialiseModels(parameters$freqList,
+#'       tsArray,
+#'      nObjects,
+#'      features,
+#'      numFitSources,
+#'      numGen,
+#'      modelList,
+#'      h,
+#'      maxCluster)
+
+#'
+initialiseModels <- function(freqList,
+                             tsArray,
+                             nObjects,
+                             features,
+                             numFitSources,
+                             numGen,
+                             modelList,
+                             h,
+                             maxCluster){
+  metaY <-matrix(NA, nrow = nObjects, ncol = 6)
   metaY <- as.data.frame(metaY)
-  colnames(metaY) <- c("index", "frequency", "group", "bestModel")
+  colnames(metaY) <- c("index", "frequency", "group", "bestModel", "bestBoxCox", "bestModelUsedBC")
   freqMembership <- list()
+  metaY[,5] = rep(1,nrow(metaY))
+  metaY[,6] = rep(0,nrow(metaY))
 
   for (k in 1: nrow(freqList)){
     name <- as.character(freqList[k,2])
@@ -63,11 +111,12 @@ initialiseModels <- function(freqList, tsArray, nObjects, features,numFitSources
       # in all the ways contended, compare the MAPSE for each and decided on the best
       # in each group
 
-      choiceModel <- assessInitialModel(y[, index])
+      choiceModel <- assessInitialModel(y[, index], modelList, h)
 
 
       output <- estimateModel(metaY, index, choiceModel, y, fit,
-                              bestFit, currentGen,lastSlot, metaDataFeatures)
+                              bestFit, 1,lastSlot, metaDataFeatures,
+                              modelList, h)
 
 
       bestFit <- output$BF
@@ -83,6 +132,7 @@ initialiseModels <- function(freqList, tsArray, nObjects, features,numFitSources
     }  # end group loops
   }    # end frequency loops
 
-  returnList <- list("MDF" = metaDataFeatures, "BF" = bestFit, "Fi" = fit, "MY" = metaY)
+  returnList <- list("MDF" = metaDataFeatures, "BF" = bestFit, "Fi" = fit,
+                     "MY" = metaY)
   return(returnList)
 }

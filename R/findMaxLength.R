@@ -16,7 +16,7 @@
 #' maxLength <- findMaxLength(endDates, freqList)
 #'
 #'
-findMaxLength <- function(minDate, maxDate){
+findMaxLength <- function(minDate, maxDate, freqList){
   n <- nrow(minDate)
   if (is.null(n)){
     n = 1

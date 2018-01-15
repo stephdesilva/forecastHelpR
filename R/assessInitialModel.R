@@ -17,7 +17,7 @@
 #'
 #' modelChoice <- assessInitialModel(data)
 #'
-assessInitialModel <- function(dataGroup){
+assessInitialModel <- function(dataGroup, modelList, h){
 
      if (is.null(ncol(dataGroup))){
       pick <- 1
@@ -29,14 +29,28 @@ assessInitialModel <- function(dataGroup){
 
     pick <- pick[complete.cases(pick)]
 
-    fitARIMA.pick <- accuracy(auto.arima(pick)) # this should be a functional of some kind
-    fitANN.pick <- accuracy(nnetar(pick))
+    n = length(modelList)
+    initialFit <- vector(mode = "numeric", length = n)
 
-    if (fitARIMA.pick[4] <= fitANN.pick[4]){
-      choiceModel <- "arima"
-    } else {
-      choiceModel <- "ann"
+    for (i  in 1:n){
+      x <- estModel(modelList, names(modelList)[i], pick,h)
+      initialFit[i] <- x[4]
     }
+
+    minFit <- which.min(initialFit)
+    choiceModel <- names(modelList)[minFit]
+
+    # fitARIMA.pick <- estModel("arima", pick) # this should be a functional of some kind
+    # fitANN.pick <- estModel("nnetar", pick)
+    # fitMean.pick <- estModel("meanforecast", pick)
+    #
+    #
+    #
+    # if (fitARIMA.pick[4] <= fitANN.pick[4]){
+    #   choiceModel <- "arima"
+    # } else {
+    #   choiceModel <- "nnetar"
+    # }
 
   return(choiceModel)
 }

@@ -30,7 +30,7 @@ buildTSArray <- function(y,nObjects, minDate, maxDate, freqList, skipList){
   require(abind)
 
   nFreqs <- nrow(freqList)
-  proposedMaxLength <-findMaxLength(minDate, maxDate)
+  proposedMaxLength <-findMaxLength(minDate, maxDate, freqList)
 
 
   maxLength <- max(as.numeric(proposedMaxLength))
@@ -88,7 +88,7 @@ buildTSArray <- function(y,nObjects, minDate, maxDate, freqList, skipList){
         if (earliestDate[1] == minDate[j,1] & earliestDate[2] == minDate[j,2]){
           timeSinceStart <- 1
         } else {
-          timeSinceStart <- findMaxLength(minDate[j,], earliestDate) ##
+          timeSinceStart <- findMaxLength(minDate[j,], earliestDate, freqList) ##
           timeSinceStart <- as.numeric(timeSinceStart)
         }
         periodsCompleted <- length(returnData$d)

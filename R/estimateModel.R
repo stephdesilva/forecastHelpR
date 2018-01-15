@@ -1,15 +1,15 @@
 estimateModel <- function(metaY, index, choiceModel, y, fit,
-                          bestFit, currentGen,lastSlot, metaDataFeatures){
+                          bestFit, currentGen,lastSlot, metaDataFeatures,
+                          modelList, h){
   for (j in 1:length(index)){
-    if (is.na(choiceModel) | is.null(choiceModel)){
-      choiceModel <- "arima" # default to arima
-    }
+
 
     estY <-na.omit(y[,index[[j]]])
 
-    accFit <- estModel(choiceModel, estY)
+    accFit <- estModel(modelList, choiceModel, estY,h)
 
-    returnList <- decisionRule(accFit, bestFit, fit, metaY, index[j], choiceModel, currentGen)
+    returnList <- decisionRule(accFit, bestFit, fit, metaY, index[j],
+                               choiceModel, currentGen, 1, 0)
   }
 
   return(returnList)
