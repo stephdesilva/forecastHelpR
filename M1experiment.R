@@ -8,7 +8,7 @@ library(readxl)
 library(abind)
 library(forecast)
 library(Mcomp)
-library(patchwork)
+
 data(M1)
 data <- M1
 parameters <- setParameters()
@@ -48,36 +48,32 @@ outcomes <- evolutionaryStage(data,
 wL <- weakLinks(parameters$weakLinkPercent, outcomes$MY, outcomes$BF)
 
 paramList <- list("weakLinks" = wL,
-              "source" = data)
+                  "source" = data,
+                  "MY" = outcomes$MY,
+                  "BF" = outcomes$BF,
+                  "Fi" = outcomes$Fi
+                  )
 
-manageWeakLinks(paramList)
+visualiseWeakLinks(paramList)
+
+
+newModel <- list("arima", "arima", "arima", "arima",
+                 "arima","arima","arima","holtDamped",
+                 "hwDSeasonalAdditive", "arima", "arima")
+
+usedBC <- c(0, 1, 1, 0,
+            0, 1, 1,0,
+            1, 0, 0 )
+
+endOutcomes <- fixWeakLinks(paramList, newModel, parameters, usedBC, data)
+
 
 
 ## Creating a visual
 
-gens <- as.vector(seq(1,parameters$numGen, 1))
-object <- rep(1, parameters$numGen)
-objData <- as.data.frame(cbind(object, outcomes$Fi[1,4,], gens, metaY[1,3]))
-chartData <- objData
+visualiseEndOutcomes(parameters, endOutcomes)
 
 
-
-for (i in 2:parameters$nObjects){
-  object <- rep(i, parameters$numGen)
-  objData <- as.data.frame(cbind(object, outcomes$Fi[i,4,],gens, metaY[i,3]))
-  chartData <- rbind(chartData, objData)
-
-}
-
-colnames(chartData) <- c("Object #", "Fit", "Generation", "Group")
-
-
-ggplot(chartData)+
-  geom_line(aes(x = Generation, y = Fit, colour= Group))+
-  theme_light()+
-  facet_wrap(~Group)
-
-# Determine weak links
 
 
 

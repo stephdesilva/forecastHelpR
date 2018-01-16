@@ -4,11 +4,11 @@ setParameters <- function(){
   skipList <- c(51, 217, 218, 493, 494, 223, 442, 548, 549, 550, 551,
                 552, 553, 554, 555, 556, 557, 558, 559)
   nObjects <- 1001
-  numGen <- 2
+  numGen <- 50
   maxCluster <- 3
   numFitSources<- 7
-  weakLinkPercent <- 0.1
-  permuteParam <- c(0.3, 0.9) # two paramters, first for model switching, second for Box Cox switching
+  weakLinkPercent <- 0.005
+  permuteParam <- c(0.9, 0.3) # two paramters, first for model switching, second for Box Cox switching
 
   freqList <- tibble(
     freq = c(1, 4, 12),
@@ -41,7 +41,8 @@ setParameters <- function(){
     hwSeasonalAdditive = function(x) hw(x, seasonal = "additive"),
     hwSeasonalMultiplicative = function(x) hw(x, seasonal = "multiplicative"),
     hwDSeasonalAdditive = function(x) hw(x, seasonal = "additive", damped = TRUE),
-    hwDSeasonalMultiplicative = function(x) hw(x, seasonal = "multiplicative", damped = TRUE)
+    hwDSeasonalMultiplicative = function(x) hw(x, seasonal = "multiplicative", damped = TRUE),
+    bagETS = function(x) baggedETS(x)
   )
   h = 5
 

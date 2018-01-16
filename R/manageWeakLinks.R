@@ -1,28 +1,24 @@
-manageWeakLinks <- function(paramList){
-  weakLinks <- paramList$weakLinks
-  data <- paramList$source
+manageWeakLinks <- function(data, paramList, i, newModel, modelList, h,
+                            numGen, usedBC){
+  metaY <- paramList$MY
+  bestFit <- paramList$BF
+  fit <- paramList$Fi
+  y <- data
 
-  for (i in 1:length(weakLinks)){
-
-    z <- data[[weakLinks[[i]]]]
-    ggplot(z$x)+
-      geom_line(aes(y = z$x, x = 1:length(z$x)))+
-      xlab("Time")+
-      ylab(z$description)+
-      ggtitle(z$description, subtitle = paste(z$period, z$type, i, sep = " : "))+
-      theme_light()
-
-    ggAcf(z$x)+
-      ggtitle(z$description, subtitle = paste(z$period, z$type, i, sep = " : "))+
-      theme_light()
-
-    ggPacf(z$x) +
-      ggtitle(z$description, subtitle = paste(z$period, z$type, i, sep = " : "))+
-      theme_light()
-
-
+  if (usedBC == 1){
+    lambda <- BoxCox.lambda(y, method = "guerrero")
+    yBC <- BoxCox(y, lambda)
+    accFit <- estModel(modelList, newModel, yBC, h)
+  } else {
+    accFit <- estModel(modelList, newModel, y,h)
+    lambda <- 0
   }
 
+  returnList <- decisionRule(accFit, bestFit, fit, metaY, i,
+                             newModel, numGen, lambda, usedBC)
 
+
+
+  return(returnList)
 
 }
