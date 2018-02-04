@@ -13,7 +13,7 @@ weakLinks <- function(wlPcnt, metaY, bestFit){
 
         fitFG <- filter(fit, group == indvidualGroup & frequency == freq)
         weakLink <- quantile(fitFG$bestFit, wlPcnt)
-        weakObjects <- filter(fitFG, bestFit <= weakLink)
+        weakObjects <- filter(fitFG, bestFit >= weakLink)
         weakObjects <- as.matrix(weakObjects[,1])
         weakLinks <- append(weakLinks, weakObjects)
       }

@@ -4,7 +4,7 @@ setParameters <- function(){
   skipList <- c(51, 217, 218, 493, 494, 223, 442, 548, 549, 550, 551,
                 552, 553, 554, 555, 556, 557, 558, 559)
   nObjects <- 1001
-  numGen <- 50
+  numGen <- 100
   maxCluster <- 3
   numFitSources<- 7
   weakLinkPercent <- 0.005

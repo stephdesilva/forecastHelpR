@@ -1,0 +1,19 @@
+---
+title: "to do"
+author: "Steph de Silva"
+date: "16/01/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Model level:
+- Look at regime change - specifically endogenous choice of breaks ala busetti and harvey
+- Fractional?
+
+Alg level:
+- jumping likelihood to likelihood is bumpy. Change up parameters.
+- check on accFit[4] - correct direction?
+- create forecasts on each model at end and plot function
